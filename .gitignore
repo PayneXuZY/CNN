@@ -1,0 +1,17 @@
+# __pycache__/
+# *.py[cod]
+# .venv/
+# env/
+# .ipynb_checkpoints/
+# logs/
+# wandb/
+# runs/
+# outputs/
+# checkpoints/
+# *.pth
+# *.pt
+# .DS_Store
+# .idea/
+# .vscode/
+# data/
+# datasets/
