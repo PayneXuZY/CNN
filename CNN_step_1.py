@@ -10,17 +10,41 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
+
+# 解决中文显示问题：优先尝试系统常见中文字体，失败则退回 sans-serif 备选
+_font_candidates = [
+    Path(r"C:\Windows\Fonts\msyh.ttc"),  # Microsoft YaHei
+    Path(r"C:\Windows\Fonts\simhei.ttf"),  # SimHei
+    Path(r"C:\Windows\Fonts\msyh.ttf"),
+]
+_font_set = False
+for _font_path in _font_candidates:
+    if _font_path.exists():
+        font_manager.fontManager.addfont(str(_font_path))
+        plt.rcParams['font.family'] = font_manager.FontProperties(fname=str(_font_path)).get_name()
+        _font_set = True
+        break
+if not _font_set:
+    plt.rcParams['font.sans-serif'] = ["SimHei", "Microsoft YaHei", "Arial Unicode MS"]
+    print("警告：未找到指定中文字体，尝试使用系统默认支持的字体。")
+plt.rcParams['axes.unicode_minus'] = False  # 确保负号正常显示
 
 # ============ 配置区域 ============
 # TODO: 把下面路径改成你数据集里任意一张图片
 img_path = r"C:\Users\Payne\PycharmProjects\CIT64X\Data Modeling\Data Source\Plastic/plastic5.jpg"   # ←←← 改这里
 resize_for_demo = (5, 5)     # 教学用的 5×5
 resize_for_practice = (128, 128)  # 实战可视化用尺寸（可改为 224 等）
-device = "cuda"               # 如有 GPU 并想用，可改 "cuda"
+# 优先使用 GPU（如可用），否则自动回落到 CPU
+if torch.cuda.is_available():
+    device = "cuda"
+else:
+    device = "cpu"
+    print("CUDA not available; falling back to CPU. Set device='cuda' when GPU is ready.")
 
 # ============ 工具函数 ============
 def conv2d_single_channel(x, kernel, stride=1, padding=0, bias=0.0):
